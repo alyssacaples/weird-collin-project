@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unique Visitor Tracker</title>
+  <title>goodbye collin</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -24,18 +24,19 @@
 </head>
 <body>
   <h1>COLLIN IS DEAD TO ME</h1>
-  <h2> click to see him disappear forever</h2>
   <div id="image-container">
+    <h2> click to see him disappear forever</h2>
     <img id="main-image" src="collin.PNG" alt="Main Image">
   </div>
   <div class="message" id="message"></div>
+
 
   <script>
     let visitorCount = 0; // Initialize visitor count
     const startTime = new Date(); // Record the start time
   
     // Get image and message elements
-    const image = document.getElementById('main-image');
+    const image = document.getElementById('image-container');
     const message = document.getElementById('message');
   
     // Add click event listener to the image
@@ -55,6 +56,13 @@
         image.src = 'gravestone.png'; // Replace with your gravestone image
         image.style.opacity = 1;
         message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTime} seconds.`;
+
+
+        // Randomly select a song
+        const songs = ['duster.mp3', 'angel.mp3']; // Replace with your song file names
+        const randomSong = songs[Math.floor(Math.random() * songs.length)];
+        audio.src = randomSong; // Set the selected song as the audio source
+        audio.play(); // Play the selected song
   
         // Disable further clicks
         image.removeEventListener('click', arguments.callee);
