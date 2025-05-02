@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unique Visitor Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      transition: opacity 0.5s ease;
+    }
+    .message {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>COLLIN IS DEAD TO ME</h1>
+  <div id="image-container">
+    <img id="main-image" src="collin.PNG" alt="Main Image">
+  </div>
+  <div class="message" id="message"></div>
+
+  <script>
+    let visitorCount = 0; // Initialize visitor count
+    const startTime = new Date(); // Record the start time
+  
+    // Get image and message elements
+    const image = document.getElementById('main-image');
+    const message = document.getElementById('message');
+  
+    // Add click event listener to the image
+    image.addEventListener('click', () => {
+      visitorCount++; // Increment visitor count
+  
+      // Calculate opacity
+      const opacity = Math.max(1 - visitorCount / 100, 0);
+  
+      if (opacity > 0) {
+        // Update image opacity
+        image.style.opacity = opacity;
+      } else {
+        // Replace image with gravestone and display message
+        const endTime = new Date();
+        const liveTime = Math.floor((endTime - startTime) / 1000); // Time in seconds
+        image.src = 'gravestone.jpg'; // Replace with your gravestone image
+        image.style.opacity = 1;
+        message.innerHTML = `RIP COLLIN<br>Image was live for ${liveTime} seconds.`;
+  
+        // Disable further clicks
+        image.removeEventListener('click', arguments.callee);
+      }
+    });
+  </script>
+</body>
+</html>
