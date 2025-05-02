@@ -24,70 +24,49 @@
 </head>
 <body>
   <h1>COLLIN IS DEAD TO ME</h1>
-  <style>
-    #image-container {
-      position: relative;
-      width: 300px; /* Adjust as needed */
-      height: 300px; /* Adjust as needed */
-    }
-  
-    #original-image,
-    #gravestone-image {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      transition: opacity 2s ease; /* Smooth transition for blending */
-    }
-  
-    #gravestone-image {
-      opacity: 0; /* Start with the gravestone image hidden */
-    }
-  </style>
-  
   <div id="image-container">
-    <img id="original-image" src="collin.PNG" alt="Original Image">
-    <img id="gravestone-image" src="gravestone.png" alt="Gravestone Image">
+      <h2> click to see him disappear forever</h2>
+    <img id="main-image" src="collin.PNG" alt="Main Image">
   </div>
   <div class="message" id="message"></div>
-  <audio id="gravestone-audio"></audio>
-  
+
+   <!-- Add an audio element for the song -->
+   <audio id="gravestone-audio" src="angel.mp3"></audio>
+
+
   <script>
     let visitorCount = 0; // Initialize visitor count
     const startTime = new Date(); // Record the start time
   
-    // Get image, message, and audio elements
-    const originalImage = document.getElementById('original-image');
-    const gravestoneImage = document.getElementById('gravestone-image');
+    // Get image and message elements
+    const image = document.getElementById('image-container');
     const message = document.getElementById('message');
     const audio = document.getElementById('gravestone-audio');
+
   
-    // Add click event listener to the original image
-    originalImage.addEventListener('click', () => {
+    // Add click event listener to the image
+    image.addEventListener('click', () => {
       visitorCount++; // Increment visitor count
   
       // Calculate opacity
       const opacity = Math.max(1 - visitorCount / 15, 0);
   
       if (opacity > 0) {
-        // Update original image opacity
-        originalImage.style.opacity = opacity;
+        // Update image opacity
+        image.style.opacity = opacity;
       } else {
-        // Blend gravestone image and display message
-        gravestoneImage.style.opacity = 1; // Fade in the gravestone image
+        // Replace image with gravestone and display message
         const endTime = new Date();
         const liveTime = Math.floor((endTime - startTime) / 1000); // Time in seconds
+        image.src = 'gravestone.png'; // Replace with your gravestone image
+        image.style.opacity = 1;
         message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTime} seconds.`;
-  
-        // Randomly select a song
-        const songs = ['song1.mp3', 'song2.mp3']; // Replace with your song file names
-        const randomSong = songs[Math.floor(Math.random() * songs.length)];
-        audio.src = randomSong; // Set the selected song as the audio source
-        audio.play(); // Play the selected song
+
+            // Play the song
+            audio.play();
   
         // Disable further clicks
-        originalImage.removeEventListener('click', arguments.callee);
+        image.removeEventListener('click', arguments.callee);
       }
     });
   </script>
