@@ -30,6 +30,10 @@
   </div>
   <div class="message" id="message"></div>
 
+   <!-- Add an audio element for the song -->
+   <audio id="gravestone-audio" src="angel.mp3"></audio>
+
+
   <script>
     let visitorCount = 0; // Initialize visitor count
     const startTime = new Date(); // Record the start time
@@ -37,6 +41,7 @@
     // Get image and message elements
     const image = document.getElementById('image-container');
     const message = document.getElementById('message');
+    const audio = document.getElementById('gravestone-audio');
   
     // Add click event listener to the image
     image.addEventListener('click', () => {
@@ -55,6 +60,9 @@
         image.src = 'gravestone.png'; // Replace with your gravestone image
         image.style.opacity = 1;
         message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTime} seconds.`;
+
+            // Play the song
+        audio.play();
   
         // Disable further clicks
         image.removeEventListener('click', arguments.callee);
