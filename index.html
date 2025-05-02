@@ -26,7 +26,7 @@
   <h1>COLLIN IS DEAD TO ME</h1>
   <div id="image-container">
       <h2> click to see him disappear forever</h2>
-    <img id="main-image" src="collin.PNG" alt="Main Image">
+    <img id="main-image" src="rip.PNG" alt="Main Image">
   </div>
   <div class="message" id="message"></div>
 
@@ -62,8 +62,12 @@
         image.style.opacity = 1;
         message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTime} seconds.`;
 
-            // Play the song
-            audio.play();
+    // Randomly select a song
+    const songs = ['duster.mp3', 'angel.mp3']; // Replace with your song file names
+      const randomSong = songs[Math.floor(Math.random() * songs.length)];
+      audio.src = randomSong; // Set the selected song as the audio source
+      audio.play(); // Play the selected song
+
   
         // Disable further clicks
         image.removeEventListener('click', arguments.callee);
