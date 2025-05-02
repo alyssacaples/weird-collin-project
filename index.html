@@ -39,6 +39,12 @@
     const image = document.getElementById('image-container');
     const message = document.getElementById('message');
   
+
+            // Randomly select a song
+    const songs = ['duster.mp3', 'angel.mp3']; // Replace with your song file names
+    const randomSong = songs[Math.floor(Math.random() * songs.length)];
+    audio.src = randomSong; // Set the selected song as the audio source
+  
     // Add click event listener to the image
     image.addEventListener('click', () => {
       visitorCount++; // Increment visitor count
@@ -58,10 +64,8 @@
         message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTime} seconds.`;
 
 
-        // Randomly select a song
-        const songs = ['duster.mp3', 'angel.mp3']; // Replace with your song file names
-        const randomSong = songs[Math.floor(Math.random() * songs.length)];
-        audio.src = randomSong; // Set the selected song as the audio source
+        
+
         audio.play(); // Play the selected song
   
         // Disable further clicks
