@@ -119,15 +119,15 @@
     // Add click event listener to the image
     image.addEventListener('click', () => {
       visitorCount++; // Increment visitor count
-  
+    
       // Calculate opacity
       const opacity = Math.max(1 - visitorCount / 15, 0);
-  
+    
       if (opacity > 0) {
         // Update image opacity
         image.style.opacity = opacity;
       } else {
-
+    
         if (qualifiesForHighScore) {
                 // Prompt for initials
                 const initials = prompt(
@@ -151,14 +151,136 @@
         //const liveTimeSeconds = Math.floor((endTime - startTime) / 1000); // Time in seconds
         //const liveTimeMilliseconds = (endTime - startTime) % 1000; // Remaining milliseconds
        // message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTimeSeconds}.${liveTimeMilliseconds} seconds.`;
-
+    
     // Randomly select a song
-    const songs = ['duster.mp3', 'angel.mp3']; // Replace with your song file names
+    const songs = ['duster.mp3', 'angel.mp3', 'taps.mp3']; // Replace with your song file names
       const randomSong = songs[Math.floor(Math.random() * songs.length)];
       audio.src = randomSong; // Set the selected song as the audio source
       audio.play(); // Play the selected song
-
-        
+    
+      // Add a new high score
+      const addHighScore = (time, initials) => {
+        fetch('/high-scores', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ time, initials })
+        })
+          .then(response => response.json())
+          .then(updatedHighScores => {
+            highScores = updatedHighScores;
+          });
+      };
+    
+      // Get high scores
+      const getHighScores = () => {
+        fetch('/high-scores')
+          .then(response => response.json())
+          .then(scores => {
+            highScores = scores;
+          });
+      };
+    
+      // Call the getHighScores function to retrieve the high scores
+      getHighScores();
+    
+      // Update the high scores display
+      const updateHighScoresDisplay = () => {
+        const highScoresList = document.getElementById('high-scores-list');
+        highScoresList.innerHTML = '';
+    
+        highScores.forEach(score => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${score.initials} - ${score.time} seconds`;
+          highScoresList.appendChild(listItem);
+        });
+      };
+    
+      // Add event listener to the submit button
+      const submitButton = document.getElementById('submit-button');
+      submitButton.addEventListener('click', () => {
+        const initialsInput = document.getElementById('initials-input');
+        const initials = initialsInput.value;
+        const time = liveTimeSeconds;
+    
+        // Call the addHighScore function to add the new high score
+        addHighScore(time, initials);
+    
+        // Update the high scores display
+        updateHighScoresDisplay();
+      });
+    });    // Fetch high scores from the backend
+    async function getHighScores() {
+      const response = await fetch("http://localhost:3000/high-scores");
+      const highScores = await response.json();
+      return highScores;
+    }
+    
+    // Save a new high score to the backend
+    async function saveHighScore(time, initials) {
+      const response = await fetch("http://localhost:3000/high-scores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ time, initials }),
+      });
+      const highScores = await response.json();
+      return highScores;
+    }
+    
+    // Display high scores
+    async function displayHighScores() {
+      const highScores = await getHighScores();
+      let highScoresHTML = "<h3>Top 10 Times</h3><ul>";
+      highScores.forEach((score, index) => {
+        highScoresHTML += `<li>${index + 1}. ${score.initials} - ${score.time.toFixed(
+          3
+        )} seconds</li>`;
+      });
+      highScoresHTML += "</ul>";
+      return highScoresHTML;
+    }
+    
+    // Replace image with gravestone and display message
+    image.addEventListener("click", async () => {
+      visitorCount++; // Increment visitor count
+    
+      // Calculate opacity
+      const opacity = Math.max(1 - visitorCount / 15, 0);
+    
+      if (opacity > 0) {
+        // Update image opacity
+        image.style.opacity = opacity;
+      } else {
+        // Replace image with gravestone and display message
+        const endTime = new Date();
+        const liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
+        image.src = "rip.png"; // Replace with your gravestone image
+        image.style.opacity = 1;
+    
+        // Check if the time qualifies for the top 10
+        const highScores = await getHighScores();
+        const qualifiesForHighScore =
+          highScores.length < maxHighScores ||
+          liveTimeSeconds < highScores[highScores.length - 1].time;
+    
+        if (qualifiesForHighScore) {
+          // Prompt for initials
+          const initials = prompt(
+            "Congratulations! You made the top 10! Enter your initials:"
+          );
+          if (initials) {
+            await saveHighScore(liveTimeSeconds, initials);
+          }
+        }
+    
+        // Display the high scores
+        message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTimeSeconds.toFixed(
+          3
+        )} seconds.<br>`;
+        message.innerHTML += await displayHighScores();
       }
     });
   </script>
