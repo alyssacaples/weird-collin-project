@@ -122,12 +122,14 @@
     
       // Calculate opacity
       const opacity = Math.max(1 - visitorCount / 15, 0);
+
+      let isGameOver = false; 
     
       if (opacity > 0) {
         // Update image opacity
         image.style.opacity = opacity;
       } else {
-    
+        if( !isGameOver) {}
         if (qualifiesForHighScore) {
                 // Prompt for initials
                 const initials = prompt(
@@ -153,6 +155,9 @@
       const randomSong = songs[Math.floor(Math.random() * songs.length)];
       audio.src = randomSong; // Set the selected song as the audio source
       audio.play(); // Play the selected song
+
+      isGameOver = true;
+      }
     
       // // Add a new high score
       // const addHighScore = (time, initials) => {
@@ -205,9 +210,7 @@
     
         // Update the high scores display
        // updateHighScoresDisplay();
-     // });
-    }
-  });
+      });
 </script>
 </body>
 </html>
