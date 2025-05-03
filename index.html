@@ -130,15 +130,15 @@
         image.style.opacity = opacity;
       } else {
         if( !isGameOver) {}
-        if (qualifiesForHighScore) {
-                // Prompt for initials
-                const initials = prompt(
-                    "Congratulations! You made the top 10! Enter your initials:"
-                );
-                if (initials) {
-                    updateHighScores(liveTimeSeconds, initials);
-                }
-            }
+        // if (qualifiesForHighScore) {
+        //         // Prompt for initials
+        //         const initials = prompt(
+        //             "Congratulations! You made the top 10! Enter your initials:"
+        //         );
+        //         if (initials) {
+        //             updateHighScores(liveTimeSeconds, initials);
+        //         }
+        //     }
         // Replace image with gravestone and display message
        // const endTime = new Date();
         image.src = "rip.png"; // Replace with your gravestone image
@@ -148,7 +148,7 @@
         const liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
         const liveTimeMilliseconds = (endTime - startTime) % 1000; // Remaining milliseconds
         message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds}.${liveTimeMilliseconds} seconds.`;
-        message.innerHTML += displayHighScores();
+        //message.innerHTML += displayHighScores();
         
     // Randomly select a song
       const songs = ['duster.mp3', 'angel.mp3', 'taps.mp3']; // Replace with your song file names
