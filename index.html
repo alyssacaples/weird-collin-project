@@ -43,6 +43,43 @@
     const message = document.getElementById('message');
     const audio = document.getElementById('gravestone-audio');
 
+    // High score feature
+    const highScoresKey = "collinHighScores"; // Key for localStorage
+    const maxHighScores = 10; // Maximum number of high scores to keep
+
+    // Function to get high scores from localStorage
+    function getHighScores() {
+        const highScores = JSON.parse(localStorage.getItem(highScoresKey)) || [];
+        return highScores;
+    }
+
+    // Function to save high scores to localStorage
+    function saveHighScores(highScores) {
+        localStorage.setItem(highScoresKey, JSON.stringify(highScores));
+    }
+
+    // Function to update the high score list
+    function updateHighScores(time, initials) {
+        const highScores = getHighScores();
+        highScores.push({ time, initials });
+        highScores.sort((a, b) => a.time - b.time); // Sort by fastest time
+        if (highScores.length > maxHighScores) {
+            highScores.pop(); // Remove the slowest time if we exceed maxHighScores
+        }
+        saveHighScores(highScores);
+    }
+
+       // Function to display high scores
+       function displayHighScores() {
+        const highScores = getHighScores();
+        let highScoresHTML = "<h3>Top 10 Times</h3><ul>";
+        highScores.forEach((score, index) => {
+            highScoresHTML += `<li>${index + 1}. ${score.initials} - ${score.time.toFixed(3)} seconds</li>`;
+        });
+        highScoresHTML += "</ul>";
+        return highScoresHTML;
+    }
+
   
     // Add click event listener to the image
     image.addEventListener('click', () => {
@@ -55,12 +92,30 @@
         // Update image opacity
         image.style.opacity = opacity;
       } else {
+
+        if (qualifiesForHighScore) {
+                // Prompt for initials
+                const initials = prompt(
+                    "Congratulations! You made the top 10! Enter your initials:"
+                );
+                if (initials) {
+                    updateHighScores(liveTimeSeconds, initials);
+                }
+            }
         // Replace image with gravestone and display message
-        const endTime = new Date();
-        const liveTime = Math.floor((endTime - startTime) / 1000); // Time in seconds
+       // const endTime = new Date();
         image.src = "rip.png"; // Replace with your gravestone image
         image.style.opacity = 1;
-        message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTime} seconds.`;
+                // Replace image with gravestone and display message
+        const endTime = new Date();
+        const liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
+        const liveTimeMilliseconds = (endTime - startTime) % 1000; // Remaining milliseconds
+        message.innerHTML = `RIP COLLIN!<br>he was alive for ${liveTimeSeconds}.${liveTimeMilliseconds} seconds.`;
+        message.innerHTML += displayHighScores();
+        // Replace image with gravestone and display message
+        //const liveTimeSeconds = Math.floor((endTime - startTime) / 1000); // Time in seconds
+        //const liveTimeMilliseconds = (endTime - startTime) % 1000; // Remaining milliseconds
+       // message.innerHTML = `RIP COLLIN<br>he was alive for ${liveTimeSeconds}.${liveTimeMilliseconds} seconds.`;
 
     // Randomly select a song
     const songs = ['duster.mp3', 'angel.mp3']; // Replace with your song file names
@@ -68,9 +123,9 @@
       audio.src = randomSong; // Set the selected song as the audio source
       audio.play(); // Play the selected song
 
-  
-        // Disable further clicks
-        image.removeEventListener('click', arguments.callee);
+        
+
+        
       }
     });
   </script>
