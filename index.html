@@ -92,24 +92,12 @@
         image.style.opacity = opacity;
       } else {
         if( !isGameOver) {}
-        // if (qualifiesForHighScore) {
-        //         // Prompt for initials
-        //         const initials = prompt(
-        //             "Congratulations! You made the top 10! Enter your initials:"
-        //         );
-        //         if (initials) {
-        //             updateHighScores(liveTimeSeconds, initials);
-        //         }
-        //     }
-        // Replace image with gravestone and display message
-       // const endTime = new Date();
         image.src = "rip.png"; // Replace with your gravestone image
         image.style.opacity = 1;
                 // Replace image with gravestone and display message
         const endTime = new Date();
         const liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
-        const liveTimeMilliseconds = (endTime - startTime) % 1000; // Remaining milliseconds
-        message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds}.${liveTimeMilliseconds} seconds.`;
+        message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds} seconds.`;
         //message.innerHTML += displayHighScores();
         
     // Randomly select a song
@@ -121,57 +109,7 @@
       isGameOver = true;
       }
     
-      // // Add a new high score
-      // const addHighScore = (time, initials) => {
-      //   fetch('/high-scores', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json'
-      //     },
-      //     body: JSON.stringify({ time, initials })
-      //   })
-      //     .then(response => response.json())
-      //     .then(updatedHighScores => {
-      //       highScores = updatedHighScores;
-      //     });
-      // };
-    
-      // // Get high scores
-      // const getHighScores = () => {
-      //   fetch('/high-scores')
-      //     .then(response => response.json())
-      //     .then(scores => {
-      //       highScores = scores;
-      //     });
-      // };
-    
-      // // Call the getHighScores function to retrieve the high scores
-      // getHighScores();
-    
-      // // Update the high scores display
-      // const updateHighScoresDisplay = () => {
-      //   const highScoresList = document.getElementById('high-scores-list');
-      //   highScoresList.innerHTML = '';
-    
-      //   highScores.forEach(score => {
-      //     const listItem = document.createElement('li');
-      //     listItem.textContent = `${score.initials} - ${score.time} seconds`;
-      //     highScoresList.appendChild(listItem);
-      //   });
-      // };
-    
-      //   // Add event listener to the submit button
-      //   const submitButton = document.getElementById('submit-button');
-      //   submitButton.addEventListener('click', () => {
-      //   const initialsInput = document.getElementById('initials-input');
-      //   const initials = initialsInput.value;
-      //   const time = liveTimeSeconds;
-    
-        // Call the addHighScore function to add the new high score
-      //  addHighScore(time, initials);
-    
-        // Update the high scores display
-       // updateHighScoresDisplay();
+
       });
 </script>
 </body>
