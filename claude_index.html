@@ -10,26 +10,127 @@
       text-align: center;
       margin: 0;
       padding: 0;
+      background-color: #1a1a1a;
+      color: #fff;
     }
+    
     img {
       max-width: 100%;
       height: auto;
       transition: opacity 0.5s ease;
+      cursor: pointer;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
     }
+    
     .message {
       font-size: 24px;
       margin-top: 20px;
+      color: #ff6b6b;
+    }
+    
+    .high-scores {
+      margin: 30px auto;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .high-scores h3 {
+      color: #ffd700;
+      margin-bottom: 15px;
+    }
+    
+    .score-list {
+      text-align: left;
+      list-style: none;
+      padding: 0;
+    }
+    
+    .score-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .score-item:last-child {
+      border-bottom: none;
+    }
+    
+    .rank {
+      color: #ffd700;
+      font-weight: bold;
+    }
+    
+    .name-input-container {
+      margin: 20px 0;
+    }
+    
+    .name-input {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-align: center;
+      max-width: 200px;
+    }
+    
+    .name-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .submit-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: background 0.3s ease;
+    }
+    
+    .submit-btn:hover {
+      background: #ff5252;
+    }
+    
+    .submit-btn:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    
+    .loading {
+      color: #ffd700;
+      font-style: italic;
+    }
+    
+    .error {
+      color: #ff4444;
+      font-size: 14px;
+    }
+    
+    .success {
+      color: #4caf50;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <h1>COLLIN IS DEAD TO ME</h1>
+  <h1 style="color: #ff6b6b; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">COLLIN IS DEAD TO ME</h1>
+  
   <div id="image-container">
-      <h2> click to see him disappear forever</h2>
+    <h2 style="color: #ffd700;">click to see him disappear forever</h2>
     <img id="main-image" src="collin.PNG" alt="Main Image">
   </div>
+  
   <div class="message" id="message"></div>
-
+  
   <div id="score-submission" style="display: none;">
     <div class="name-input-container">
       <input type="text" id="player-name" class="name-input" placeholder="Enter your name" maxlength="20">
@@ -38,17 +139,21 @@
     <div id="submission-status"></div>
   </div>
   
+  <div class="high-scores">
+    <h3>🏆 Hall of Shame - Fastest Clickers</h3>
+    <div id="high-scores-list" class="loading">Loading scores...</div>
+  </div>
 
-   <!-- Add an audio element for the song -->
-   <audio id="gravestone-audio" src="angel.mp3"></audio>
+  <!-- Add an audio element for the song -->
+  <audio id="gravestone-audio" src="angel.mp3"></audio>
 
   <script>
-    let visitorCount = 0; // Initialize visitor count
-    const startTime = new Date(); // Record the start time
+    let visitorCount = 0;
+    const startTime = new Date();
     let gameOver = false;
     let finalTime = 0;
-  
-    // Get image and message elements
+    
+    // Get DOM elements
     const image = document.getElementById('main-image');
     const message = document.getElementById('message');
     const audio = document.getElementById('gravestone-audio');
@@ -57,42 +162,41 @@
     const submitScoreBtn = document.getElementById('submit-score');
     const submissionStatus = document.getElementById('submission-status');
 
-        // Load high scores on page load
-        loadHighScores();
+    // Load high scores on page load
+    loadHighScores();
 
     // Add click event listener to the image
     image.addEventListener('click', () => {
       if (gameOver) return;
-      visitorCount++; // Increment visitor count
-    
-      // Calculate opacity
+      
+      visitorCount++;
       const opacity = Math.max(1 - visitorCount / 15, 0);
-    
+
       if (opacity > 0) {
-        // Update image opacity
         image.style.opacity = opacity;
       } else {
         gameOver = true;
-        image.src = "rip.png"; // Replace with your gravestone image
+        image.src = "rip.png";
         image.style.opacity = 1;
-                // Replace image with gravestone and display message
+        
         const endTime = new Date();
-        const liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
-        message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds} seconds.`;
-        //message.innerHTML += displayHighScores();
-
-             // Show score submission
+        finalTime = (endTime - startTime) / 1000;
+        
+        message.innerHTML = `RIP COLLIN <br>he was alive for ${finalTime.toFixed(3)} seconds.`;
+        
+        // Show score submission
         checkIfQualifiesForHighScore(finalTime);
         
-    // Randomly select a song
-      const songs = ['duster.mp3', 'angel.mp3', 'taps.mp3']; // Replace with your song file names
-      const randomSong = songs[Math.floor(Math.random() * songs.length)];
-      audio.src = randomSong; // Set the selected song as the audio source
-      audio.play(); // Play the selected song
+        // Play random song
+        const songs = ['duster.mp3', 'angel.mp3', 'taps.mp3'];
+        const randomSong = songs[Math.floor(Math.random() * songs.length)];
+        audio.src = randomSong;
+        audio.play().catch(e => console.log('Audio play failed:', e));
       }
-      });
+    });
 
-      submitScoreBtn.addEventListener('click', submitScore);
+    // Submit score functionality
+    submitScoreBtn.addEventListener('click', submitScore);
     playerNameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         submitScore();
@@ -187,8 +291,6 @@
         submitScoreBtn.textContent = 'Submit Score';
       }
     }
-
-      
-</script>
+  </script>
 </body>
 </html>
