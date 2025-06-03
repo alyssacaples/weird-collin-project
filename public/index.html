@@ -47,6 +47,7 @@
     let visitorCount = 0; // Initialize visitor count
     const startTime = new Date(); // Record the start time
     let gameOver = false;
+    let liveTimeSeconds = 0;
   
     // Get image and message elements
     const image = document.getElementById('main-image');
@@ -77,7 +78,7 @@
         image.style.opacity = 1;
                 // Replace image with gravestone and display message
         const endTime = new Date();
-        const liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
+        liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
         message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds.toFixed(2)} seconds.`;
         //message.innerHTML += displayHighScores();
 
