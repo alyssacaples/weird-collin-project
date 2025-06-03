@@ -29,6 +29,7 @@
     <img id="main-image" src="collin.PNG" alt="Main Image">
   </div>
   <div class="message" id="message"></div>
+  <div id="high-scores-list"></div>
 
   <div id="score-submission" style="display: none;">
     <div class="name-input-container">
@@ -120,7 +121,7 @@
         return; // Exit the function if the element doesn't exist
       }
 
-      highScoresContainer.innerHTML = ''; // Clear existing content
+      //highScoresContainer.innerHTML = ''; // Clear existing content
 
       highScores.forEach((score) => {
         const scoreElement = document.createElement('div');
@@ -137,7 +138,7 @@
         
         if (scores.length < 10 || time < scores[scores.length - 1].time) {
           scoreSubmission.style.display = 'block';
-          submissionStatus.innerHTML = '<div class="success">🎉 You qualified for the high scores!</div>';
+          submissionStatus.innerHTML = '<div class="success">🎉 You qualified for a high score!</div>';
         } else {
           submissionStatus.innerHTML = '<div class="error">Your time didn\'t make the top 10. Try again!</div>';
         }
