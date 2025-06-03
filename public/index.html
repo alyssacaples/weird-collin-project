@@ -78,7 +78,7 @@
                 // Replace image with gravestone and display message
         const endTime = new Date();
         const liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
-        message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds} seconds.`;
+        message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds.toFixed(2)} seconds.`;
         //message.innerHTML += displayHighScores();
 
              // Show score submission
@@ -168,7 +168,7 @@
           },
           body: JSON.stringify({
             playerName: playerName,
-            time: finalTime
+            time: liveTimeSeconds.toFixed(2) // Send time as a string with 2 decimal places
           })
         });
 
