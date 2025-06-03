@@ -46,7 +46,6 @@
     let visitorCount = 0; // Initialize visitor count
     const startTime = new Date(); // Record the start time
     let gameOver = false;
-    let finalTime = 0;
   
     // Get image and message elements
     const image = document.getElementById('main-image');
@@ -82,7 +81,7 @@
         //message.innerHTML += displayHighScores();
 
              // Show score submission
-        checkIfQualifiesForHighScore(finalTime);
+        checkIfQualifiesForHighScore(liveTimeSeconds);
         
     // Randomly select a song
       const songs = ['duster.mp3', 'angel.mp3', 'taps.mp3']; // Replace with your song file names
@@ -102,30 +101,33 @@
     async function loadHighScores() {
       try {
         const response = await fetch('/api/getHighScores');
-        const scores = await response.json();
-        displayHighScores(scores);
+        if (response.ok) {
+          const highScores = await response.json();
+          displayHighScores(highScores);
+        } else {
+          console.error('Failed to load high scores.');
+        }
       } catch (error) {
         console.error('Error loading high scores:', error);
-        document.getElementById('high-scores-list').innerHTML = '<div class="error">Failed to load scores</div>';
       }
     }
 
-    function displayHighScores(scores) {
-      const container = document.getElementById('high-scores-list');
-      
-      if (!scores || scores.length === 0) {
-        container.innerHTML = '<div>No scores yet. Be the first!</div>';
-        return;
+    function displayHighScores(highScores) {
+      const highScoresContainer = document.getElementById('high-scores-list'); // Ensure this ID matches the element in your HTML
+
+      if (!highScoresContainer) {
+        console.error('High scores container element not found in the DOM.');
+        return; // Exit the function if the element doesn't exist
       }
 
-      const scoresList = scores.map((score, index) => `
-        <div class="score-item">
-          <span><span class="rank">#${index + 1}</span> ${score.playerName}</span>
-          <span>${score.time.toFixed(3)}s</span>
-        </div>
-      `).join('');
+      highScoresContainer.innerHTML = ''; // Clear existing content
 
-      container.innerHTML = `<div class="score-list">${scoresList}</div>`;
+      highScores.forEach((score) => {
+        const scoreElement = document.createElement('div');
+        scoreElement.className = 'high-score';
+        scoreElement.textContent = `${score.playerName}: ${score.time}s`;
+        highScoresContainer.appendChild(scoreElement);
+      });
     }
 
     async function checkIfQualifiesForHighScore(time) {
