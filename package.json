@@ -1,5 +1,11 @@
 {
-  "dependencies": {
-    "@azure/data-tables": "^13.3.0"
-  }
+  "name": "static-web-app",
+  "version": "1.0.0",
+  "description": "Static web app with API integration",
+  "scripts": {
+    "start": "echo 'This is a static web app hosted on Azure Static Web Apps. No local server is required.'"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "license": "MIT"
 }
