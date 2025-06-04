@@ -20,6 +20,12 @@ body.hard-mode {
   color: #fff;
 }
 
+@media (max-width: 768px) {
+  body.hard-mode {
+    background-image: url('flames-mobile.gif'); /* Use smaller optimized GIF */
+  }
+}
+
 body.hard-mode::before {
   content: '';
   position: fixed;
