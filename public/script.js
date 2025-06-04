@@ -233,24 +233,33 @@ function resetGame() {
   startTime = new Date();
 }
 
-function switchTab(scoreType) {
-  currentScoreType = scoreType;
+function switchTab(tabType) {
+  currentScoreType = tabType;
   
-  // Update tab appearance
-  document.getElementById('all-time-tab').classList.toggle('active', scoreType === 'allTime');
-  document.getElementById('daily-tab').classList.toggle('active', scoreType === 'daily');
+  // Update active tab UI
+  const allTimeTab = document.getElementById('all-time-tab');
+  const dailyTab = document.getElementById('daily-tab');
   
-  // Display appropriate cached scores
+  if (tabType === 'allTime') {
+    allTimeTab.classList.add('active');
+    dailyTab.classList.remove('active');
+  } else {
+    dailyTab.classList.add('active');
+    allTimeTab.classList.remove('active');
+  }
+  
+  // Display the appropriate scores for the selected tab and current mode
   displayCurrentScores();
 }
 
+// Fix the getApiEndpoints function
 function getApiEndpoints(mode, scoreType) {
   const prefix = mode === 'hard' ? 'Hard' : '';
   const suffix = scoreType === 'daily' ? 'Daily' : '';
   
   return {
     get: `/api/get${prefix}${suffix}HighScores`,
-    submit: `/api/submit${prefix}${suffix}Score` // Fixed: Prefix → prefix
+    submit: `/api/submit${prefix}${suffix}Score`
   };
 }
 
@@ -280,38 +289,67 @@ async function preloadHighScores() {
   }
 }
 
-// Separated loading function - now just refreshes the cache
-async function loadHighScores() {
-  try {
-    const [normalAllTime, normalDaily, hardAllTime, hardDaily] = await Promise.all([
-      fetch('/api/getHighScores'),
-      fetch('/api/getDailyHighScores'),
-      fetch('/api/getHardHighScores'),
-      fetch('/api/getHardDailyHighScores')
-    ]);
-    
-    if (normalAllTime.ok) cachedAllTimeScores = await normalAllTime.json();
-    if (normalDaily.ok) cachedDailyScores = await normalDaily.json();
-    if (hardAllTime.ok) cachedHardAllTimeScores = await hardAllTime.json();
-    if (hardDaily.ok) cachedHardDailyScores = await hardDaily.json();
-    
-    scoresLoaded = true;
-    displayCurrentScores();
-  } catch (error) {
-    console.error('Error loading high scores:', error);
-    displayCurrentScores();
-  }
+// Update the loadHighScores function
+function loadHighScores() {
+  const endpoints = getApiEndpoints(currentMode, currentScoreType);
+  debugLog(`Loading scores for mode: ${currentMode}, type: ${currentScoreType}`, endpoints);
+  
+  const scoresList = document.getElementById('high-scores-list');
+  
+  // Show loading message
+  scoresList.innerHTML = '<div class="loading">Loading high scores...</div>';
+  
+  fetch(endpoints.get)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Store in cache based on mode and score type
+      if (currentMode === 'hard') {
+        if (currentScoreType === 'daily') {
+          cachedHardDailyScores = data;
+        } else {
+          cachedHardAllTimeScores = data;
+        }
+      } else {
+        if (currentScoreType === 'daily') {
+          cachedDailyScores = data;
+        } else {
+          cachedAllTimeScores = data;
+        }
+      }
+      
+      // Update scoresLoaded flag
+      scoresLoaded = true;
+      
+      // Display the scores
+      displayHighScores(data);
+    })
+    .catch(error => {
+      console.error('Error loading high scores:', error);
+      scoresList.innerHTML = '<div class="error">Error loading high scores. Please try again later.</div>';
+    });
 }
 
 // Separated display function - uses cached data
 function displayCurrentScores() {
-  let scores;
+  let cachedScores;
+  
+  // Choose the correct cached scores based on current mode and type
   if (currentMode === 'hard') {
-    scores = currentScoreType === 'allTime' ? cachedHardAllTimeScores : cachedHardDailyScores;
+    cachedScores = currentScoreType === 'daily' ? cachedHardDailyScores : cachedHardAllTimeScores;
   } else {
-    scores = currentScoreType === 'allTime' ? cachedAllTimeScores : cachedDailyScores;
+    cachedScores = currentScoreType === 'daily' ? cachedDailyScores : cachedAllTimeScores;
   }
-  displayHighScores(scores);
+  
+  if (cachedScores && cachedScores.length > 0) {
+    displayHighScores(cachedScores);
+  } else {
+    loadHighScores();
+  }
 }
 
 function displayHighScores(highScores) {
@@ -340,49 +378,38 @@ function displayHighScores(highScores) {
   });
 }
 
-async function checkIfQualifiesForHighScore(time) {
-  try {
-    let allTimeScores, dailyScores;
-    
-    if (currentMode === 'hard') {
-      allTimeScores = cachedHardAllTimeScores;
-      dailyScores = cachedHardDailyScores;
-    } else {
-      allTimeScores = cachedAllTimeScores;
-      dailyScores = cachedDailyScores;
-    }
-    
-    if (!scoresLoaded) {
-      const endpoints = getApiEndpoints(currentMode, 'allTime');
-      const dailyEndpoints = getApiEndpoints(currentMode, 'daily');
-      
-      const [allTimeResponse, dailyResponse] = await Promise.all([
-        fetch(endpoints.get),
-        fetch(dailyEndpoints.get)
-      ]);
-      
-      allTimeScores = allTimeResponse.ok ? await allTimeResponse.json() : [];
-      dailyScores = dailyResponse.ok ? await dailyResponse.json() : [];
-    }
-    
-    const qualifiesAllTime = allTimeScores.length < 10 || time < allTimeScores[allTimeScores.length - 1]?.time;
-    const qualifiesDaily = dailyScores.length < 10 || time < dailyScores[dailyScores.length - 1]?.time;
-    
-    if (qualifiesAllTime || qualifiesDaily) {
-      scoreSubmission.style.display = 'block';
-      const modeText = currentMode === 'hard' ? ' (HARD MODE 🔥)' : '';
-      const message = qualifiesAllTime && qualifiesDaily ? 
-        `🎉 You qualified for both all-time AND daily high scores${modeText}!` :
-        qualifiesAllTime ? `🎉 You qualified for an all-time high score${modeText}!` :
-        `🎉 You qualified for a daily high score${modeText}!`;
-      submissionStatus.innerHTML = `<div class="success">${message}</div>`;
-    } else {
-      submissionStatus.innerHTML = '<div class="error">Your time didn\'t make the top 10. Try again!</div>';
-    }
-  } catch (error) {
-    console.error('Error checking high score qualification:', error);
+// Update the checkIfQualifiesForHighScore function
+function checkIfQualifiesForHighScore(time) {
+  // Get the appropriate cached scores based on current mode
+  let cachedScores;
+  
+  if (currentMode === 'hard') {
+    cachedScores = currentScoreType === 'daily' ? cachedHardDailyScores : cachedHardAllTimeScores;
+  } else {
+    cachedScores = currentScoreType === 'daily' ? cachedDailyScores : cachedAllTimeScores;
+  }
+  
+  // If no scores loaded yet, show the form
+  if (!cachedScores || cachedScores.length === 0) {
     scoreSubmission.style.display = 'block';
-    submissionStatus.innerHTML = '<div class="error">Could not check qualification. You can still try to submit.</div>';
+    return;
+  }
+  
+  // Check if the current score qualifies for the leaderboard
+  const lowestScore = cachedScores[cachedScores.length - 1];
+  
+  // If less than 10 scores or better than the lowest score
+  if (cachedScores.length < 10 || time < lowestScore.time) {
+    scoreSubmission.style.display = 'block';
+  }
+}
+
+const DEBUG = true;
+
+// Add this helper function for logging
+function debugLog(...args) {
+  if (DEBUG) {
+    console.log(...args);
   }
 }
 
@@ -393,55 +420,65 @@ async function submitScore() {
     submissionStatus.innerHTML = '<div class="error">Please enter your name</div>';
     return;
   }
-
-  submitScoreBtn.disabled = true;
-  submitScoreBtn.textContent = 'Submitting...';
   
-  try {
-    const allTimeEndpoints = getApiEndpoints(currentMode, 'allTime');
-    const dailyEndpoints = getApiEndpoints(currentMode, 'daily');
-    
-    // Submit to both all-time and daily endpoints
-    const [allTimeResponse, dailyResponse] = await Promise.all([
-      fetch(allTimeEndpoints.submit, {
+  submitScoreBtn.disabled = true;
+  submissionStatus.innerHTML = '<div class="loading">Submitting score...</div>';
+  
+  const scoreData = {
+    name: playerName,
+    time: liveTimeSeconds
+  };
+  
+  // Get the correct API endpoint based on current mode
+  const endpoints = getApiEndpoints(currentMode, 'allTime'); // Always submit to all-time leaderboard
+  
+  debugLog(`Submitting score for mode: ${currentMode}, time: ${liveTimeSeconds}`);
+  
+  fetch(endpoints.submit, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(scoreData)
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Also submit to daily leaderboard
+      const dailyEndpoints = getApiEndpoints(currentMode, 'daily');
+      return fetch(dailyEndpoints.submit, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName, time: liveTimeSeconds })
-      }),
-      fetch(dailyEndpoints.submit, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName, time: liveTimeSeconds })
-      })
-    ]);
-
-    const allTimeResult = allTimeResponse.ok ? await allTimeResponse.json() : { success: false };
-    const dailyResult = dailyResponse.ok ? await dailyResponse.json() : { success: false };
-    
-    if (allTimeResult.success || dailyResult.success) {
-      const messages = [];
-      if (allTimeResult.success) messages.push('all-time record');
-      if (dailyResult.success) messages.push('daily record');
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(scoreData)
+      });
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      submissionStatus.innerHTML = '<div class="success">Score submitted successfully!</div>';
       
-      const modeText = currentMode === 'hard' ? ' (HARD MODE 🔥)' : '';
-      const updateText = (allTimeResult.updated || dailyResult.updated) ? ' (Updated your previous best!)' : '';
-      submissionStatus.innerHTML = `<div class="success">✅ Score submitted for ${messages.join(' and ')}${modeText}!${updateText}</div>`;
+      // Reload scores after submission
+      scoresLoaded = false; // Force reload
+      loadHighScores();
+      
+      // Hide submission form
       scoreSubmission.style.display = 'none';
-      
-      // Refresh the cache and display after successful submission
-      setTimeout(() => {
-        loadHighScores();
-      }, 1000);
-    } else {
-      submissionStatus.innerHTML = '<div class="error">Score did not qualify for records</div>';
-    }
-  } catch (error) {
-    console.error('Error submitting score:', error);
-    submissionStatus.innerHTML = '<div class="error">Failed to submit score. Please try again.</div>';
-  } finally {
-    submitScoreBtn.disabled = false;
-    submitScoreBtn.textContent = 'Submit Score';
-  }
+    })
+    .catch(error => {
+      console.error('Error submitting score:', error);
+      submissionStatus.innerHTML = '<div class="error">Error submitting score. Please try again.</div>';
+      submitScoreBtn.disabled = false;
+    });
 }
 
 // Create floating Collins for hard mode background
