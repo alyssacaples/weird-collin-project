@@ -11,8 +11,12 @@ body {
 }
 
 body.hard-mode {
-  background: url('flames.gif') center center;
+  /* Use a static fallback for devices that don't support animated backgrounds well */
+  background-color: #500; /* Dark red fallback */
+  background-image: url('flames.gif');
+  background-position: center center;
   background-size: cover;
+  background-attachment: fixed; /* Prevents scrolling issues */
   color: #fff;
 }
 
@@ -424,5 +428,39 @@ h1 {
   100% {
     transform: translateY(-100vh) rotate(360deg);
     opacity: 0.05;
+  }
+}
+
+/* Update the hard-mode body background */
+body.hard-mode {
+  /* Use a static fallback for devices that don't support animated backgrounds well */
+  background-color: #500; /* Dark red fallback */
+  background-image: url('flames.gif');
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed; /* Prevents scrolling issues */
+  color: #fff;
+}
+
+/* Add this media query for mobile devices */
+@media (max-width: 768px) {
+  body.hard-mode {
+    /* Use a gradient fallback for mobile instead of the gif */
+    background-image: linear-gradient(45deg, #800, #f00, #c00, #800);
+    background-size: 400% 400%;
+    animation: gradient-fire 10s ease infinite;
+  }
+  
+  @keyframes gradient-fire {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Make floating Collins smaller on mobile for better performance */
+  .floating-collin {
+    width: 25px !important;
+    height: 25px !important;
+    opacity: 0.08 !important;
   }
 }

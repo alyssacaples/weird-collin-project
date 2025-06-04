@@ -494,7 +494,7 @@ function startHardModeSizeChanges() {
     }
     
     // Random size between 50% and 130% of original
-    const randomSize = 10 + Math.random() * 50;
+    const randomSize = 10 + (Math.random() * 40);
     image.style.width = `${randomSize}%`;
     image.style.height = 'auto'; 
     
