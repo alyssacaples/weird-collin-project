@@ -17,23 +17,34 @@ module.exports = async function (context, req) {
 
     try {
         const { playerName, time } = req.body;
-        
-        if (!playerName || !time || typeof time !== 'number') {
+    
+        // Validate input
+        if (!playerName || typeof time !== 'number') {
             context.res = {
                 status: 400,
-                body: { error: 'Invalid input: playerName and time (number) required' }
+                body: { error: 'Invalid input. playerName and time are required.' }
             };
             return;
         }
-
-        // Get current scores
-        let scores = [];
+    
+        // Check if blob exists
         const exists = await blobClient.exists();
-        
+        let scores = [];
+    
         if (exists) {
-            const downloadResponse = await blobClient.download();
-            const downloaded = await streamToBuffer(downloadResponse.readableStreamBody);
-            scores = JSON.parse(downloaded.toString());
+            try {
+                // Download and parse the existing JSON file
+                const downloadResponse = await blobClient.download();
+                const downloaded = await streamToBuffer(downloadResponse.readableStreamBody);
+                scores = JSON.parse(downloaded.toString());
+            } catch (parseError) {
+                context.log.error('Error parsing scores blob:', parseError);
+                context.res = {
+                    status: 500,
+                    body: { error: 'Failed to parse scores blob' }
+                };
+                return;
+            }
         }
 
         // Check if this time qualifies for top 10
