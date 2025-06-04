@@ -119,7 +119,7 @@ module.exports = async function (context, req) {
             const jsonString = JSON.stringify(scores, null, 2);
             context.log('Uploading JSON string:', jsonString);
             
-            await blobClient.upload(jsonString, Buffer.byteLength(jsonString), {
+            await blobClient.uploadData(jsonString, Buffer.byteLength(jsonString), {
                 overwrite: true,
                 blobHTTPHeaders: {
                     blobContentType: 'application/json'
