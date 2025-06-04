@@ -1,504 +1,117 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-  background-color: #ffffff;
-  color: #333;
-  transition: all 0.5s ease;
-  position: relative;
-  min-height: 100vh;
-}
+/* Enhanced z-index and button interaction fixes */
 
-body.hard-mode {
-  /* Use a static fallback for devices that don't support animated backgrounds well */
-  background-color: #500; /* Dark red fallback */
-  background-image: url('flames.gif');
-  background-position: center center;
-  background-size: cover;
-  background-attachment: fixed; /* Prevents scrolling issues */
-  color: #fff;
-}
-
-@media (max-width: 768px) {
-  body.hard-mode {
-    background-image: url('flames-mobile.gif'); /* Use smaller optimized GIF */
-  }
-}
-
-body.hard-mode::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, rgba(255, 68, 68, 0.3), rgba(204, 0, 0, 0.3), rgba(255, 102, 102, 0.3), rgba(170, 0, 0, 0.3));
-  z-index: -1;
-  pointer-events: none;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  transition: opacity 0.5s ease;
-  cursor: pointer;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
-  position: relative;
-  z-index: 10;
-}
-
-.image-container {
-  position: relative;
-  display: inline-block;
-  transition: all 0.1s ease;
-}
-
-h1 {
-  color: #333;
-}
-
-.message {
-  font-size: 24px;
-  margin-top: 20px;
-  color: #ff6b6b;
-}
-
-.click-instruction {
-  font-size: 18px;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-.mode-controls {
-  margin: 20px 0;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.mode-btn {
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: bold;
-  border: 3px solid;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
-  color: #333;
-}
-
-.mode-btn.normal {
-  border-color: #4caf50;
-  color: #4caf50;
-}
-
-.mode-btn.normal:hover {
-  background: #4caf50;
-  color: white;
-}
-
-.mode-btn.normal.active {
-  background: #4caf50;
-  color: white;
-}
-
-.mode-btn.hard {
-  border-color: #ff4444;
-  color: #ff4444;
-}
-
-.mode-btn.hard:hover {
-  background: #ff4444;
-  color: white;
-}
-
-.mode-btn.hard.active {
-  background: #ff4444;
-  color: white;
-}
-
-.high-scores {
-  margin: 30px auto;
-  max-width: 500px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 15px;
-  padding: 20px;
-  border: 2px solid #ddd;
-  display: none;
-}
-
-.high-scores h3 {
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 20px;
-}
-
-.score-tabs {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.score-tab {
-  padding: 8px 16px;
-  background: #f0f0f0;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.score-tab.active {
-  background: #ff6b6b;
-  color: white;
-  border-color: #ff6b6b;
-}
-
-.score-list {
-  text-align: left;
-  list-style: none;
-  padding: 0;
-  min-height: 200px;
-}
-
-.score-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.score-item:last-child {
-  border-bottom: none;
-}
-
-.rank {
-  color: #ff6b6b;
-  font-weight: bold;
-}
-
-.name-input-container {
-  margin: 20px 0;
-}
-
-.name-input {
-  padding: 10px;
-  font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  background: white;
-  color: #333;
-  text-align: center;
-  max-width: 200px;
-}
-
-.name-input::placeholder {
-  color: #999;
-}
-
-.submit-btn, .try-again-btn {
-  padding: 10px 20px;
-  font-size: 16px;
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 10px;
-  transition: background 0.3s ease;
-}
-
-.submit-btn:hover, .try-again-btn:hover {
-  background: #ff5252;
-}
-
-.submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.try-again-btn {
-  background: #4caf50;
-  margin-top: 20px;
-}
-
-.try-again-btn:hover {
-  background: #45a049;
-}
-
-.loading {
-  color: #ff6b6b;
-  font-style: italic;
-}
-
-.error {
-  color: #ff4444;
-  font-size: 14px;
-}
-
-.success {
-  color: #4caf50;
-  font-size: 14px;
-}
-
-/* Hard Mode Styles */
-.hard-mode img {
-  box-shadow: 0 4px 15px rgba(255, 100, 0, 0.8);
-}
-
-.hard-mode .message {
-  color: #ffaa00;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.hard-mode .mode-btn {
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.hard-mode .high-scores {
-  background: rgba(0, 0, 0, 0.3);
-  border-color: #ff6666;
-  color: white;
-}
-
-.hard-mode .high-scores h3 {
-  color: #ffaa00;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-
-.hard-mode .score-tab {
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
-}
-
-.hard-mode .score-tab.active {
-  background: #ff6b6b;
-  color: white;
-}
-
-.hard-mode .score-item {
-  border-bottom-color: rgba(255, 255, 255, 0.2);
-}
-
-.hard-mode .rank {
-  color: #ffaa00;
-}
-
-.hard-mode .success {
-  color: #90ff90;
-}
-
-.hard-mode .click-instruction {
-  color: #ffaa00;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-
-.hard-mode h1 {
-  color: #ffaa00;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-}
-
-/* Game controls styling */
-.game-controls {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  padding: 15px;
-  margin: 20px auto;
-  max-width: 500px; /* Match the width of the high-scores container */
-}
-
-.control-btn {
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: bold;
-  border: 3px solid;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
-  color: #333;
-}
-
-.control-btn.normal {
-  border-color: #4caf50;
-  color: #4caf50;
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
-.control-btn.normal:hover {
-  background: #4caf50;
-  color: white;
-}
-
-.control-btn.hard {
-  border-color: #ff4444;
-  color: #ff4444;
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
-.control-btn.hard:hover {
-  background: #ff4444;
-  color: white;
-}
-
-.hard-mode .control-btn {
-  box-shadow: 0 0 15px rgba(255, 100, 0, 0.5);
-}
-
-/* Add this to the hard mode styles section */
-.hard-mode .image-container img {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>') 12 12, crosshair;
-  transition: all 0.05s ease; /* Make opacity changes smoother */
-}
-
-/* Add a subtle animation to indicate the target is moving */
-.hard-mode .image-container {
-  animation: pulse 1s infinite alternate;
-}
-
-@keyframes pulse {
-  from { transform: scale(1); }
-  to { transform: scale(1.03); }
-}
-
-/* Add this after your existing animations */
-
-/* Small floating Collins background effect for hard mode */
-.hard-mode::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: -1;
-  background: url('collin.PNG');
-  background-size: 80px auto;
-  opacity: 0.08;
-  animation: floating-collins 60s linear infinite;
-}
-
-@keyframes floating-collins {
-  from {
-    background-position: 0% 100%;
-  }
-  to {
-    background-position: 200% -100%;
-  }
-}
-
-/* Add multiple layers of floating Collins with different speeds and directions */
-.hard-mode .floating-collins-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.floating-collin {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  background-image: url('collin.PNG');
-  background-size: contain;
-  background-repeat: no-repeat;
-  opacity: 0.1;
-  pointer-events: none;
-  animation: float-up 15s linear infinite;
-}
-
-@keyframes float-up {
-  0% {
-    transform: translateY(100%) rotate(0deg);
-    opacity: 0.05;
-  }
-  10% {
-    opacity: 0.1;
-  }
-  90% {
-    opacity: 0.1;
-  }
-  100% {
-    transform: translateY(-100vh) rotate(360deg);
-    opacity: 0.05;
-  }
-}
-
-/* Update the hard-mode body background */
-body.hard-mode {
-  /* Use a static fallback for devices that don't support animated backgrounds well */
-  background-color: #500; /* Dark red fallback */
-  background-image: url('/flames.gif');
-  background-position: center center;
-  background-size: cover;
-  background-attachment: fixed; /* Prevents scrolling issues */
-  color: #fff;
-}
-
-/* Add this media query for mobile devices */
-@media (max-width: 768px) {
-  body.hard-mode {
-    /* Use a gradient fallback for mobile instead of the gif */
-    background-image: linear-gradient(45deg, #800, #f00, #c00, #800);
-    background-size: 400% 400%;
-    animation: gradient-fire 10s ease infinite;
-  }
-  
-  @keyframes gradient-fire {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
-  /* Make floating Collins smaller on mobile for better performance */
-  .floating-collin {
-    width: 25px !important;
-    height: 25px !important;
-    opacity: 0.08 !important;
-  }
-}
-
-/* Update these styles to ensure buttons are clickable */
+/* Ensure floating collins stay in background */
 .floating-collins-container {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* This allows clicks to pass through */
-  z-index: 5; /* Keep above background but below UI elements */
+  pointer-events: none !important; /* Force no pointer events */
+  z-index: 1; /* Keep very low */
 }
 
-/* Make sure score submission has higher z-index */
+.floating-collin {
+  pointer-events: none !important; /* Ensure no interference */
+  z-index: 1;
+}
+
+/* Make sure all UI elements are above floating elements */
 #score-submission {
   position: relative;
-  z-index: 10; /* Higher than floating collins */
+  z-index: 100; /* Much higher than floating elements */
+  background: rgba(255, 255, 255, 0.95); /* Add background for better visibility */
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px auto;
+  max-width: 400px;
 }
 
-/* Make the button itself have pointer events */
-#submit-score {
-  position: relative;
-  z-index: 10;
-  pointer-events: auto; /* Explicitly enable pointer events */
-  cursor: pointer;
+.hard-mode #score-submission {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #ff6666;
 }
 
-/* Also ensure all interactive elements work */
-button, input, a {
+/* Enhanced button styling */
+.submit-btn {
   position: relative;
-  z-index: 10; /* Higher than floating elements */
-  pointer-events: auto !important; /* Force pointer events */
+  z-index: 101; /* Even higher than the container */
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.submit-btn:disabled {
+  background: #ccc !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Enhanced input styling */
+.name-input {
+  position: relative;
+  z-index: 101;
+  pointer-events: auto !important;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  text-align: center;
+  max-width: 200px;
+  margin-bottom: 15px;
+}
+
+.hard-mode .name-input {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #ff6666;
+}
+
+/* Ensure all interactive elements have proper z-index */
+button, input, a, .control-btn {
+  position: relative;
+  z-index: 100;
+  pointer-events: auto !important;
+}
+
+/* Make sure high scores container is also above floating elements */
+.high-scores {
+  position: relative;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.hard-mode .high-scores {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+/* Additional debugging styles */
+.name-input-container {
+  position: relative;
+  z-index: 101;
+  margin: 20px 0;
+  padding: 10px;
+}
+
+#submission-status {
+  position: relative;
+  z-index: 101;
+  margin-top: 10px;
 }

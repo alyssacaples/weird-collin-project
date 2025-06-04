@@ -413,7 +413,7 @@ function debugLog(...args) {
   }
 }
 
-// Update your submitScore function to submit to both all-time and daily endpoints
+/// Updated submitScore function with proper button re-enabling
 function submitScore() {
   const playerName = playerNameInput.value.trim();
   
@@ -484,6 +484,9 @@ function submitScore() {
     console.log('Daily submit success:', data);
     submissionStatus.innerHTML = '<div class="success">Score submitted successfully!</div>';
     
+    // RE-ENABLE THE BUTTON - This was missing!
+    submitScoreBtn.disabled = false;
+    
     // Clear cached scores to force reload
     if (currentMode === 'hard') {
       cachedHardAllTimeScores = null;
@@ -507,7 +510,7 @@ function submitScore() {
   .catch(error => {
     console.error('Error submitting score:', error);
     submissionStatus.innerHTML = `<div class="error">Error submitting score. Please try again.</div>`;
-    submitScoreBtn.disabled = false;
+    submitScoreBtn.disabled = false; // This was already here, which is good
   });
 }
 
