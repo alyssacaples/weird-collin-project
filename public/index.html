@@ -194,10 +194,15 @@ body {
 
   <script>
     let visitorCount = 0;
-    let startTime = new Date();
+    let startTime = new Date(); // Changed from const to let
     let gameOver = false;
     let liveTimeSeconds = 0;
     let currentScoreType = 'allTime'; // 'allTime' or 'daily'
+    
+    // Cache for high scores to avoid repeated API calls
+    let cachedAllTimeScores = [];
+    let cachedDailyScores = [];
+    let scoresLoaded = false;
   
     // Get elements
     const image = document.getElementById('main-image');
@@ -210,6 +215,11 @@ body {
     const clickInstruction = document.getElementById('click-instruction');
     const highScoresContainer = document.getElementById('high-scores-container');
     const tryAgainBtn = document.getElementById('try-again-btn');
+
+    // Preload high scores when page loads
+    window.addEventListener('load', () => {
+      preloadHighScores();
+    });
 
     // Add click event listener to the image
     image.addEventListener('click', () => {
@@ -235,12 +245,16 @@ body {
         liveTimeSeconds = (endTime - startTime) / 1000;
         message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds.toFixed(3)} seconds.`;
 
-        // Show high scores and try again button
+        // Show high scores and try again button immediately
         highScoresContainer.style.display = 'block';
         tryAgainBtn.style.display = 'inline-block';
         
-        // Load and display high scores
-        loadHighScores();
+        // Display cached scores or load if not available
+        if (scoresLoaded) {
+          displayCurrentScores();
+        } else {
+          loadHighScores();
+        }
         
         // Check if qualifies for high score
         checkIfQualifiesForHighScore(liveTimeSeconds);
@@ -281,7 +295,7 @@ body {
       audio.pause();
       audio.currentTime = 0;
       
-      // Reset start time
+      // Reset start time - this now works because startTime is let, not const
       startTime = new Date();
     }
 
@@ -292,25 +306,62 @@ body {
       document.getElementById('all-time-tab').classList.toggle('active', scoreType === 'allTime');
       document.getElementById('daily-tab').classList.toggle('active', scoreType === 'daily');
       
-      // Load appropriate scores
-      loadHighScores();
+      // Display appropriate cached scores
+      displayCurrentScores();
     }
 
+    // Preload both score types in the background
+    async function preloadHighScores() {
+      try {
+        const [allTimeResponse, dailyResponse] = await Promise.all([
+          fetch('/api/getHighScores'),
+          fetch('/api/getDailyHighScores')
+        ]);
+        
+        if (allTimeResponse.ok) {
+          cachedAllTimeScores = await allTimeResponse.json();
+        }
+        if (dailyResponse.ok) {
+          cachedDailyScores = await dailyResponse.json();
+        }
+        
+        scoresLoaded = true;
+      } catch (error) {
+        console.error('Error preloading high scores:', error);
+        // Set empty arrays as fallback
+        cachedAllTimeScores = [];
+        cachedDailyScores = [];
+        scoresLoaded = true;
+      }
+    }
+
+    // Separated loading function - now just refreshes the cache
     async function loadHighScores() {
       try {
-        const endpoint = currentScoreType === 'daily' ? '/api/getDailyHighScores' : '/api/getHighScores';
-        const response = await fetch(endpoint);
-        if (response.ok) {
-          const highScores = await response.json();
-          displayHighScores(highScores);
-        } else {
-          console.error('Failed to load high scores.');
-          displayHighScores([]); // Show empty list
+        const [allTimeResponse, dailyResponse] = await Promise.all([
+          fetch('/api/getHighScores'),
+          fetch('/api/getDailyHighScores')
+        ]);
+        
+        if (allTimeResponse.ok) {
+          cachedAllTimeScores = await allTimeResponse.json();
         }
+        if (dailyResponse.ok) {
+          cachedDailyScores = await dailyResponse.json();
+        }
+        
+        scoresLoaded = true;
+        displayCurrentScores();
       } catch (error) {
         console.error('Error loading high scores:', error);
-        displayHighScores([]); // Show empty list
+        displayCurrentScores(); // Still display what we have cached
       }
+    }
+
+    // Separated display function - uses cached data
+    function displayCurrentScores() {
+      const scores = currentScoreType === 'allTime' ? cachedAllTimeScores : cachedDailyScores;
+      displayHighScores(scores);
     }
 
     function displayHighScores(highScores) {
@@ -341,14 +392,19 @@ body {
 
     async function checkIfQualifiesForHighScore(time) {
       try {
-        // Check both all-time and daily scores
-        const [allTimeResponse, dailyResponse] = await Promise.all([
-          fetch('/api/getHighScores'),
-          fetch('/api/getDailyHighScores')
-        ]);
+        // Use cached scores if available, otherwise load fresh
+        let allTimeScores = cachedAllTimeScores;
+        let dailyScores = cachedDailyScores;
         
-        const allTimeScores = allTimeResponse.ok ? await allTimeResponse.json() : [];
-        const dailyScores = dailyResponse.ok ? await dailyResponse.json() : [];
+        if (!scoresLoaded) {
+          const [allTimeResponse, dailyResponse] = await Promise.all([
+            fetch('/api/getHighScores'),
+            fetch('/api/getDailyHighScores')
+          ]);
+          
+          allTimeScores = allTimeResponse.ok ? await allTimeResponse.json() : [];
+          dailyScores = dailyResponse.ok ? await dailyResponse.json() : [];
+        }
         
         const qualifiesAllTime = allTimeScores.length < 10 || time < allTimeScores[allTimeScores.length - 1]?.time;
         const qualifiesDaily = dailyScores.length < 10 || time < dailyScores[dailyScores.length - 1]?.time;
@@ -406,7 +462,11 @@ body {
           
           submissionStatus.innerHTML = `<div class="success">✅ Score submitted for ${messages.join(' and ')}!</div>`;
           scoreSubmission.style.display = 'none';
-          setTimeout(loadHighScores, 1000);
+          
+          // Refresh the cache and display after successful submission
+          setTimeout(() => {
+            loadHighScores();
+          }, 1000);
         } else {
           submissionStatus.innerHTML = '<div class="error">Score did not qualify for records</div>';
         }
