@@ -470,3 +470,35 @@ body.hard-mode {
     opacity: 0.08 !important;
   }
 }
+
+/* Update these styles to ensure buttons are clickable */
+.floating-collins-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* This allows clicks to pass through */
+  z-index: 5; /* Keep above background but below UI elements */
+}
+
+/* Make sure score submission has higher z-index */
+#score-submission {
+  position: relative;
+  z-index: 10; /* Higher than floating collins */
+}
+
+/* Make the button itself have pointer events */
+#submit-score {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto; /* Explicitly enable pointer events */
+  cursor: pointer;
+}
+
+/* Also ensure all interactive elements work */
+button, input, a {
+  position: relative;
+  z-index: 10; /* Higher than floating elements */
+  pointer-events: auto !important; /* Force pointer events */
+}

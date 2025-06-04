@@ -413,7 +413,7 @@ function debugLog(...args) {
   }
 }
 
-// Update your submitScore function if needed
+// Update your submitScore function to submit to both all-time and daily endpoints
 function submitScore() {
   const playerName = playerNameInput.value.trim();
   
@@ -427,16 +427,20 @@ function submitScore() {
   
   // Make sure field names match what your API expects
   const scoreData = {
-    playerName: playerName,  // Use playerName to match API
-    time: liveTimeSeconds    // Use time to match API
+    playerName: playerName,
+    time: liveTimeSeconds
   };
   
   console.log(`Submitting score for mode: ${currentMode}`, scoreData);
   
-  const endpoints = getApiEndpoints(currentMode, 'allTime');
-  console.log(`Using endpoint: ${endpoints.submit}`);
+  // Get both endpoint types
+  const allTimeEndpoints = getApiEndpoints(currentMode, 'allTime');
+  const dailyEndpoints = getApiEndpoints(currentMode, 'daily');
   
-  fetch(endpoints.submit, {
+  console.log(`Using endpoints: ${allTimeEndpoints.submit} and ${dailyEndpoints.submit}`);
+  
+  // First submit to all-time leaderboard
+  fetch(allTimeEndpoints.submit, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -444,17 +448,40 @@ function submitScore() {
     body: JSON.stringify(scoreData)
   })
   .then(response => {
-    console.log(`Response status: ${response.status}`);
+    console.log(`All-time response status: ${response.status}`);
     if (!response.ok) {
       return response.text().then(text => {
-        console.error(`Error response: ${text}`);
+        console.error(`Error response (all-time): ${text}`);
         throw new Error(`Network response was not ok: ${response.status}`);
       });
     }
     return response.json();
   })
   .then(data => {
-    console.log('Submit success:', data);
+    console.log('All-time submit success:', data);
+    
+    // Now submit to daily leaderboard
+    return fetch(dailyEndpoints.submit, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(scoreData)
+    });
+  })
+  .then(response => {
+    console.log(`Daily response status: ${response.status}`);
+    if (!response.ok) {
+      return response.text().then(text => {
+        console.error(`Error response (daily): ${text}`);
+        // Don't throw here - we already submitted to all-time successfully
+        return { success: false, message: "Daily submission failed" };
+      });
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Daily submit success:', data);
     submissionStatus.innerHTML = '<div class="success">Score submitted successfully!</div>';
     
     // Clear cached scores to force reload
@@ -468,6 +495,7 @@ function submitScore() {
     
     // Force reload high scores with a slight delay to allow server processing
     setTimeout(() => {
+      // Load the currently displayed score type
       loadHighScores();
     }, 500);
     
@@ -592,4 +620,80 @@ function moveCollinToRandomPosition() {
   imageContainer.style.position = 'absolute';
   imageContainer.style.left = newX + 'px';
   imageContainer.style.top = newY + 'px';
+}
+
+// Add this function to help debug clickability issues
+function debugClickability() {
+  const elements = [
+    { name: 'Submit button', element: document.getElementById('submit-score') },
+    { name: 'Score submission div', element: document.getElementById('score-submission') },
+    { name: 'Player name input', element: document.getElementById('player-name') },
+    { name: 'Floating collins container', element: document.querySelector('.floating-collins-container') }
+  ];
+  
+  console.log('=== CLICKABILITY DEBUG ===');
+  elements.forEach(item => {
+    if (!item.element) {
+      console.log(`${item.name}: ELEMENT NOT FOUND`);
+      return;
+    }
+    
+    const style = window.getComputedStyle(item.element);
+    console.log(`${item.name}:`);
+    console.log(`- Display: ${style.display}`);
+    console.log(`- Visibility: ${style.visibility}`);
+    console.log(`- Z-index: ${style.zIndex}`);
+    console.log(`- Position: ${style.position}`);
+    console.log(`- Pointer-events: ${style.pointerEvents}`);
+  });
+  
+  // Check for overlapping elements
+  const submitBtn = document.getElementById('submit-score');
+  if (submitBtn) {
+    const rect = submitBtn.getBoundingClientRect();
+    console.log('Submit button position:', rect);
+    
+    // Check elements at this position
+    const elementsAtPoint = document.elementsFromPoint(
+      rect.left + rect.width/2, 
+      rect.top + rect.height/2
+    );
+    
+    console.log('Elements at submit button position (top to bottom):');
+    elementsAtPoint.forEach((el, idx) => {
+      console.log(`${idx+1}. ${el.tagName} - class: ${el.className}, id: ${el.id}`);
+    });
+  }
+}
+
+// Call this when showing the score submission form
+function checkIfQualifiesForHighScore(time) {
+  // Get the appropriate cached scores based on current mode
+  let cachedScores;
+  
+  if (currentMode === 'hard') {
+    cachedScores = currentScoreType === 'daily' ? cachedHardDailyScores : cachedHardAllTimeScores;
+  } else {
+    cachedScores = currentScoreType === 'daily' ? cachedDailyScores : cachedAllTimeScores;
+  }
+  
+  // If no scores loaded yet, show the form
+  if (!cachedScores || cachedScores.length === 0) {
+    scoreSubmission.style.display = 'block';
+    return;
+  }
+  
+  // Check if the current score qualifies for the leaderboard
+  const lowestScore = cachedScores[cachedScores.length - 1];
+  
+  // If less than 10 scores or better than the lowest score
+  if (cachedScores.length < 10 || time < lowestScore.time) {
+    scoreSubmission.style.display = 'block';
+  }
+  
+  // If showing the form, debug clickability
+  if (scoreSubmission.style.display === 'block') {
+    // Small delay to ensure styles are applied
+    setTimeout(debugClickability, 100);
+  }
 }
