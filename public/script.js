@@ -252,14 +252,14 @@ function switchTab(tabType) {
   displayCurrentScores();
 }
 
-// Check or update your getApiEndpoints function
+// Fix the getApiEndpoints function to properly handle daily submissions
 function getApiEndpoints(mode, scoreType) {
   const prefix = mode === 'hard' ? 'Hard' : '';
   const suffix = scoreType === 'daily' ? 'Daily' : '';
   
   return {
     get: `/api/get${prefix}${suffix}HighScores`,
-    submit: `/api/submit${prefix}Score`  // Make sure this matches your API paths
+    submit: `/api/submit${prefix}${suffix}Score`  // Add suffix for daily submissions
   };
 }
 
