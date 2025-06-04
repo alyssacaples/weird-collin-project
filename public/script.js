@@ -499,7 +499,7 @@ function startHardModeSizeChanges() {
     image.style.height = 'auto'; 
     
     
-  }, 800 + Math.random() * 600); // Change size every 1.2-2 seconds
+  }, 400 + Math.random() * 600); // Change size every 1.2-2 seconds
 }
 
 // Add this variable to track the movement interval
@@ -523,7 +523,7 @@ function startHardModeMovementInterval() {
     // Move to a random position
     moveCollinToRandomPosition();
     
-  }, 1500 + Math.random() * 1500); // Move every 2.5-4 seconds
+  }, 1000 + Math.random() * 1500); // Move every 2.5-4 seconds
 }
 
 // Create a function to handle the random movement logic
@@ -531,7 +531,7 @@ function moveCollinToRandomPosition() {
   if (gameOver) return;
   
   const maxX = window.innerWidth - imageContainer.offsetWidth;
-  const maxY = window.innerHeight - imageContainer.offsetHeight - 200; // Leave space for UI
+  const maxY = window.innerHeight - imageContainer.offsetHeight - 100; // Leave space for UI
   
   const newX = Math.random() * Math.max(maxX, 0);
   const newY = Math.random() * Math.max(maxY, 100) + 100; // Keep some space from top
