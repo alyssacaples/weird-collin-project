@@ -252,14 +252,14 @@ function switchTab(tabType) {
   displayCurrentScores();
 }
 
-// Fix the getApiEndpoints function
+// Check or update your getApiEndpoints function
 function getApiEndpoints(mode, scoreType) {
   const prefix = mode === 'hard' ? 'Hard' : '';
   const suffix = scoreType === 'daily' ? 'Daily' : '';
   
   return {
     get: `/api/get${prefix}${suffix}HighScores`,
-    submit: `/api/submit${prefix}${suffix}Score`
+    submit: `/api/submit${prefix}Score`  // Make sure this matches your API paths
   };
 }
 
@@ -413,7 +413,8 @@ function debugLog(...args) {
   }
 }
 
-async function submitScore() {
+// Update your submitScore function if needed
+function submitScore() {
   const playerName = playerNameInput.value.trim();
   
   if (!playerName) {
@@ -424,15 +425,16 @@ async function submitScore() {
   submitScoreBtn.disabled = true;
   submissionStatus.innerHTML = '<div class="loading">Submitting score...</div>';
   
+  // Make sure field names match what your API expects
   const scoreData = {
-    name: playerName,
-    time: liveTimeSeconds
+    playerName: playerName,  // Use playerName to match API
+    time: liveTimeSeconds    // Use time to match API
   };
   
-  // Get the correct API endpoint based on current mode
-  const endpoints = getApiEndpoints(currentMode, 'allTime'); // Always submit to all-time leaderboard
+  console.log(`Submitting score for mode: ${currentMode}`, scoreData);
   
-  debugLog(`Submitting score for mode: ${currentMode}, time: ${liveTimeSeconds}`);
+  const endpoints = getApiEndpoints(currentMode, 'allTime');
+  console.log(`Using endpoint: ${endpoints.submit}`);
   
   fetch(endpoints.submit, {
     method: 'POST',
@@ -441,44 +443,33 @@ async function submitScore() {
     },
     body: JSON.stringify(scoreData)
   })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      // Also submit to daily leaderboard
-      const dailyEndpoints = getApiEndpoints(currentMode, 'daily');
-      return fetch(dailyEndpoints.submit, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(scoreData)
+  .then(response => {
+    console.log(`Response status: ${response.status}`);
+    if (!response.ok) {
+      return response.text().then(text => {
+        console.error(`Error response: ${text}`);
+        throw new Error(`Network response was not ok: ${response.status}`);
       });
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      submissionStatus.innerHTML = '<div class="success">Score submitted successfully!</div>';
-      
-      // Reload scores after submission
-      scoresLoaded = false; // Force reload
-      loadHighScores();
-      
-      // Hide submission form
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Submit success:', data);
+    submissionStatus.innerHTML = '<div class="success">Score submitted successfully!</div>';
+    
+    // Reload scores after submission
+    loadHighScores();
+    
+    // Hide submission form after delay
+    setTimeout(() => {
       scoreSubmission.style.display = 'none';
-    })
-    .catch(error => {
-      console.error('Error submitting score:', error);
-      submissionStatus.innerHTML = '<div class="error">Error submitting score. Please try again.</div>';
-      submitScoreBtn.disabled = false;
-    });
+    }, 2000);
+  })
+  .catch(error => {
+    console.error('Error submitting score:', error);
+    submissionStatus.innerHTML = `<div class="error">Error submitting score. Please try again.</div>`;
+    submitScoreBtn.disabled = false;
+  });
 }
 
 // Create floating Collins for hard mode background
