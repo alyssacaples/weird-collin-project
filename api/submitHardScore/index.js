@@ -42,20 +42,32 @@ module.exports = async function (context, req) {
             }
         }
 
-        const { playerName, time } = requestBody;
+        // Extract playerName and time from request
+        const playerName = requestBody.playerName;
+        const time = requestBody.time;
         
         context.log('Extracted playerName:', playerName);
         context.log('Extracted time:', time, 'Type:', typeof time);
-    
-        // Validate input
-        if (!playerName || typeof time !== 'number' || isNaN(time) || time <= 0) {
-            context.log('Validation failed - playerName:', playerName, 'time:', time);
+        
+        // Validate input - CRITICAL - Make sure these checks match what your frontend sends
+        if (!playerName || typeof playerName !== 'string' || playerName.trim() === '') {
             context.res = {
                 status: 400,
                 headers: {
                     "Access-Control-Allow-Origin": "*"
                 },
-                body: { error: 'Invalid input. playerName and valid time are required.' }
+                body: { error: 'Invalid input. playerName is required.' }
+            };
+            return;
+        }
+        
+        if (time === undefined || time === null || isNaN(parseFloat(time))) {
+            context.res = {
+                status: 400,
+                headers: {
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: { error: 'Invalid input. A valid time value is required.' }
             };
             return;
         }

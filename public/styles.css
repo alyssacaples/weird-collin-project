@@ -441,7 +441,7 @@ h1 {
 body.hard-mode {
   /* Use a static fallback for devices that don't support animated backgrounds well */
   background-color: #500; /* Dark red fallback */
-  background-image: url('flames.gif');
+  background-image: url('/flames.gif');
   background-position: center center;
   background-size: cover;
   background-attachment: fixed; /* Prevents scrolling issues */
