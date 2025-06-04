@@ -123,7 +123,7 @@ module.exports = async function (context, req) {
             const jsonString = JSON.stringify(scores, null, 2);
             context.log('Uploading daily scores JSON string:', jsonString);
             
-            const blockBlobClient = containerClient.getBlockBlobClient(`daily-scores-${today}.json`);
+            const blockBlobClient = containerClient.getBlockBlobClient(`hard-daily-scores-${today}.json`);
             await blockBlobClient.upload(jsonString, jsonString.length, { overwrite: true });
             context.log('Successfully uploaded daily scores to blob');
 

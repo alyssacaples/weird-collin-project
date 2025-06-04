@@ -457,8 +457,19 @@ function submitScore() {
     console.log('Submit success:', data);
     submissionStatus.innerHTML = '<div class="success">Score submitted successfully!</div>';
     
-    // Reload scores after submission
-    loadHighScores();
+    // Clear cached scores to force reload
+    if (currentMode === 'hard') {
+      cachedHardAllTimeScores = null;
+      cachedHardDailyScores = null;
+    } else {
+      cachedAllTimeScores = null;
+      cachedDailyScores = null;
+    }
+    
+    // Force reload high scores with a slight delay to allow server processing
+    setTimeout(() => {
+      loadHighScores();
+    }, 500);
     
     // Hide submission form after delay
     setTimeout(() => {
