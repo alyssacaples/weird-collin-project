@@ -5,17 +5,20 @@ const blobServiceClient = BlobServiceClient.fromConnectionString(
 );
 
 const containerClient = blobServiceClient.getContainerClient("gamedata");
-const blobClient = containerClient.getBlobClient("hardDailyHighscores.json");
 
 module.exports = async function (context, req) {
-    context.log('Getting hard mode daily high scores from blob storage');
+    context.log('Getting daily high scores from blob storage');
 
     try {
-        // Check if blob exists
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+        const blobClient = containerClient.getBlobClient(`hard-daily-scores-${today}.json`);
+        
+        // Check if blob exists for today
         const exists = await blobClient.exists();
         
         if (!exists) {
-            // Return empty array if file doesn't exist yet
+            // Return empty array if no scores for today yet
             context.res = {
                 status: 200,
                 headers: {
@@ -32,16 +35,14 @@ module.exports = async function (context, req) {
         const downloaded = await streamToBuffer(downloadResponse.readableStreamBody);
         const scores = JSON.parse(downloaded.toString());
 
-        // Filter for today's scores only
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        const todayScores = scores.filter(score => {
-            // If score has date property, check if it's today
-            if (score.date) {
-                return score.date.startsWith(today);
-            }
-            // If no date property, include it (for backward compatibility)
-            return true;
-        });
+        // Sort by time (ascending - faster times first) and format
+        const formattedScores = scores
+            .sort((a, b) => a.time - b.time)
+            .slice(0, 10)
+            .map(score => ({
+                playerName: score.playerName,
+                time: parseFloat(score.time).toFixed(3)
+            }));
 
         context.res = {
             status: 200,
@@ -49,13 +50,16 @@ module.exports = async function (context, req) {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*"
             },
-            body: todayScores
+            body: formattedScores
         };
     } catch (error) {
-        context.log.error('Error getting hard mode daily high scores:', error);
+        context.log.error('Error getting daily high scores:', error);
         context.res = {
             status: 500,
-            body: { error: 'Failed to get hard mode daily high scores' }
+            headers: {
+                "Access-Control-Allow-Origin": "*"
+            },
+            body: { error: 'Failed to get daily high scores' }
         };
     }
 };

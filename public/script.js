@@ -485,21 +485,33 @@ function submitScore() {
 
 // Create floating Collins for hard mode background
 function createFloatingCollins() {
-  // Create container if it doesn't exist
-  let container = document.querySelector('.floating-collins-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.className = 'floating-collins-container';
-    document.body.appendChild(container);
+  console.log('Creating floating Collins');
+  
+  // Remove existing container if any
+  const existingContainer = document.querySelector('.floating-collins-container');
+  if (existingContainer) {
+    existingContainer.remove();
   }
   
-  // Clear existing floating Collins
-  container.innerHTML = '';
+  // Create new container
+  const container = document.createElement('div');
+  container.className = 'floating-collins-container';
+  document.body.appendChild(container);
   
-  // Create 15 random floating Collins
+  console.log('Container created:', container);
+  
+  // Create 15 random floating Collins with better styling
   for (let i = 0; i < 15; i++) {
     const collin = document.createElement('div');
     collin.className = 'floating-collin';
+    
+    // Add actual image to each collin
+    const collinImg = document.createElement('img');
+    collinImg.src = 'collin.PNG';
+    collinImg.alt = 'Floating Collin';
+    collinImg.style.width = '100%';
+    collinImg.style.height = '100%';
+    collin.appendChild(collinImg);
     
     // Random position, size, and animation duration
     const size = 30 + Math.random() * 40;
@@ -512,8 +524,10 @@ function createFloatingCollins() {
     collin.style.left = `${left}%`;
     collin.style.animationDuration = `${duration}s`;
     collin.style.animationDelay = `${delay}s`;
+    collin.style.opacity = '0.2'; // Start with some opacity
     
     container.appendChild(collin);
+    console.log(`Collin ${i+1} created`);
   }
 }
 
