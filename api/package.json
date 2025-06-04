@@ -2,6 +2,6 @@
     "name": "collin-game-api",
     "version": "1.0.0",
     "dependencies": {
-      "@azure/storage-blob": "^12.15.0"
+      "@azure/storage-blob": "^12.17.0"
     }
   }
