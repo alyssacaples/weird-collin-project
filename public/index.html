@@ -10,8 +10,8 @@ body {
       text-align: center;
       margin: 0;
       padding: 0;
-      background-color: #1a1a1a;
-      color: #fff;
+      background-color: #ffffff;
+      color: #333;
     }
     
     img {
@@ -31,29 +31,55 @@ body {
     
     .high-scores {
       margin: 30px auto;
-      max-width: 400px;
-      background: rgba(255, 255, 255, 0.1);
+      max-width: 500px;
+      background: rgba(0, 0, 0, 0.05);
       border-radius: 15px;
       padding: 20px;
-      backdrop-filter: blur(10px);
+      border: 2px solid #ddd;
+      display: none;
     }
     
     .high-scores h3 {
-      color: #ffd700;
+      color: #333;
       margin-bottom: 15px;
+      font-size: 20px;
+    }
+    
+    .score-tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+    
+    .score-tab {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    
+    .score-tab.active {
+      background: #ff6b6b;
+      color: white;
+      border-color: #ff6b6b;
     }
     
     .score-list {
       text-align: left;
       list-style: none;
       padding: 0;
+      min-height: 200px;
     }
     
     .score-item {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
     
     .score-item:last-child {
@@ -61,7 +87,7 @@ body {
     }
     
     .rank {
-      color: #ffd700;
+      color: #ff6b6b;
       font-weight: bold;
     }
     
@@ -72,19 +98,19 @@ body {
     .name-input {
       padding: 10px;
       font-size: 16px;
-      border: none;
+      border: 2px solid #ddd;
       border-radius: 5px;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
+      background: white;
+      color: #333;
       text-align: center;
       max-width: 200px;
     }
     
     .name-input::placeholder {
-      color: rgba(255, 255, 255, 0.7);
+      color: #999;
     }
     
-    .submit-btn {
+    .submit-btn, .try-again-btn {
       padding: 10px 20px;
       font-size: 16px;
       background: #ff6b6b;
@@ -92,21 +118,30 @@ body {
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      margin-left: 10px;
+      margin: 10px;
       transition: background 0.3s ease;
     }
     
-    .submit-btn:hover {
+    .submit-btn:hover, .try-again-btn:hover {
       background: #ff5252;
     }
     
     .submit-btn:disabled {
-      background: #666;
+      background: #ccc;
       cursor: not-allowed;
     }
     
+    .try-again-btn {
+      background: #4caf50;
+      margin-top: 20px;
+    }
+    
+    .try-again-btn:hover {
+      background: #45a049;
+    }
+    
     .loading {
-      color: #ffd700;
+      color: #ff6b6b;
       font-style: italic;
     }
     
@@ -119,16 +154,30 @@ body {
       color: #4caf50;
       font-size: 14px;
     }
+
+    .click-instruction {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>COLLIN IS DEAD TO ME</h1>
   <div id="image-container">
-      <h2> click to see him disappear forever</h2>
+    <div class="click-instruction" id="click-instruction">click to see him disappear forever</div>
     <img id="main-image" src="collin.PNG" alt="Main Image">
   </div>
   <div class="message" id="message"></div>
-  <div id="high-scores-list"></div>
+  
+  <div class="high-scores" id="high-scores-container">
+    <h3>Records for Fastest Collin Disappearance</h3>
+    <div class="score-tabs">
+      <div class="score-tab active" id="all-time-tab" onclick="switchTab('allTime')">All Time</div>
+      <div class="score-tab" id="daily-tab" onclick="switchTab('daily')">Today</div>
+    </div>
+    <div id="high-scores-list"></div>
+  </div>
 
   <div id="score-submission" style="display: none;">
     <div class="name-input-container">
@@ -138,17 +187,19 @@ body {
     <div id="submission-status"></div>
   </div>
   
+  <button id="try-again-btn" class="try-again-btn" style="display: none;" onclick="resetGame()">Bring Collin Back?</button>
 
    <!-- Add an audio element for the song -->
    <audio id="gravestone-audio" src="angel.mp3"></audio>
 
   <script>
-    let visitorCount = 0; // Initialize visitor count
-    const startTime = new Date(); // Record the start time
+    let visitorCount = 0;
+    const startTime = new Date();
     let gameOver = false;
     let liveTimeSeconds = 0;
+    let currentScoreType = 'allTime'; // 'allTime' or 'daily'
   
-    // Get image and message elements
+    // Get elements
     const image = document.getElementById('main-image');
     const message = document.getElementById('message');
     const audio = document.getElementById('gravestone-audio');
@@ -156,14 +207,14 @@ body {
     const playerNameInput = document.getElementById('player-name');
     const submitScoreBtn = document.getElementById('submit-score');
     const submissionStatus = document.getElementById('submission-status');
-
-        // Load high scores on page load
-        loadHighScores();
+    const clickInstruction = document.getElementById('click-instruction');
+    const highScoresContainer = document.getElementById('high-scores-container');
+    const tryAgainBtn = document.getElementById('try-again-btn');
 
     // Add click event listener to the image
     image.addEventListener('click', () => {
       if (gameOver) return;
-      visitorCount++; // Increment visitor count
+      visitorCount++;
     
       // Calculate opacity
       const opacity = Math.max(1 - visitorCount / 15, 0);
@@ -173,72 +224,142 @@ body {
         image.style.opacity = opacity;
       } else {
         gameOver = true;
-        image.src = "rip.png"; // Replace with your gravestone image
+        image.src = "rip.png";
         image.style.opacity = 1;
-                // Replace image with gravestone and display message
+        
+        // Hide click instruction
+        clickInstruction.style.display = 'none';
+        
+        // Calculate time and show message
         const endTime = new Date();
-        liveTimeSeconds = (endTime - startTime) / 1000; // Time in seconds with milliseconds
-        message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds} seconds.`;
-        //message.innerHTML += displayHighScores();
+        liveTimeSeconds = (endTime - startTime) / 1000;
+        message.innerHTML = `RIP COLLIN <br>he was alive for ${liveTimeSeconds.toFixed(3)} seconds.`;
 
-             // Show score submission
+        // Show high scores and try again button
+        highScoresContainer.style.display = 'block';
+        tryAgainBtn.style.display = 'inline-block';
+        
+        // Load and display high scores
+        loadHighScores();
+        
+        // Check if qualifies for high score
         checkIfQualifiesForHighScore(liveTimeSeconds);
         
-    // Randomly select a song
-      const songs = ['duster.mp3', 'angel.mp3', 'taps.mp3']; // Replace with your song file names
-      const randomSong = songs[Math.floor(Math.random() * songs.length)];
-      audio.src = randomSong; // Set the selected song as the audio source
-      audio.play(); // Play the selected song
+        // Play random song
+        const songs = ['duster.mp3', 'angel.mp3', 'taps.mp3'];
+        const randomSong = songs[Math.floor(Math.random() * songs.length)];
+        audio.src = randomSong;
+        audio.play();
       }
-      });
+    });
 
-      submitScoreBtn.addEventListener('click', submitScore);
+    submitScoreBtn.addEventListener('click', submitScore);
     playerNameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         submitScore();
       }
     });
 
+    function resetGame() {
+      // Reset game state
+      visitorCount = 0;
+      gameOver = false;
+      liveTimeSeconds = 0;
+      
+      // Reset UI
+      image.src = "collin.PNG";
+      image.style.opacity = 1;
+      message.innerHTML = '';
+      clickInstruction.style.display = 'block';
+      highScoresContainer.style.display = 'none';
+      scoreSubmission.style.display = 'none';
+      tryAgainBtn.style.display = 'none';
+      submissionStatus.innerHTML = '';
+      playerNameInput.value = '';
+      
+      // Stop audio
+      audio.pause();
+      audio.currentTime = 0;
+      
+      // Reset start time
+      startTime = new Date();
+    }
+
+    function switchTab(scoreType) {
+      currentScoreType = scoreType;
+      
+      // Update tab appearance
+      document.getElementById('all-time-tab').classList.toggle('active', scoreType === 'allTime');
+      document.getElementById('daily-tab').classList.toggle('active', scoreType === 'daily');
+      
+      // Load appropriate scores
+      loadHighScores();
+    }
+
     async function loadHighScores() {
       try {
-        const response = await fetch('/api/getHighScores');
+        const endpoint = currentScoreType === 'daily' ? '/api/getDailyHighScores' : '/api/getHighScores';
+        const response = await fetch(endpoint);
         if (response.ok) {
           const highScores = await response.json();
           displayHighScores(highScores);
         } else {
           console.error('Failed to load high scores.');
+          displayHighScores([]); // Show empty list
         }
       } catch (error) {
         console.error('Error loading high scores:', error);
+        displayHighScores([]); // Show empty list
       }
     }
 
     function displayHighScores(highScores) {
-      const highScoresContainer = document.getElementById('high-scores-list'); // Ensure this ID matches the element in your HTML
+      const highScoresContainer = document.getElementById('high-scores-list');
 
       if (!highScoresContainer) {
         console.error('High scores container element not found in the DOM.');
-        return; // Exit the function if the element doesn't exist
+        return;
       }
 
-      //highScoresContainer.innerHTML = ''; // Clear existing content
+      highScoresContainer.innerHTML = '';
 
-      highScores.forEach((score) => {
+      if (highScores.length === 0) {
+        highScoresContainer.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No scores yet!</div>';
+        return;
+      }
+
+      highScores.forEach((score, index) => {
         const scoreElement = document.createElement('div');
-        scoreElement.className = 'high-score';
-        scoreElement.textContent = `${score.playerName}: ${score.time}s`;
+        scoreElement.className = 'score-item';
+        scoreElement.innerHTML = `
+          <span><span class="rank">#${index + 1}</span> ${score.playerName}</span>
+          <span>${score.time}s</span>
+        `;
         highScoresContainer.appendChild(scoreElement);
       });
     }
 
     async function checkIfQualifiesForHighScore(time) {
       try {
-        const response = await fetch('/api/getHighScores');
-        const scores = await response.json();
+        // Check both all-time and daily scores
+        const [allTimeResponse, dailyResponse] = await Promise.all([
+          fetch('/api/getHighScores'),
+          fetch('/api/getDailyHighScores')
+        ]);
         
-        if (scores.length < 10 || time < scores[scores.length - 1].time) {
+        const allTimeScores = allTimeResponse.ok ? await allTimeResponse.json() : [];
+        const dailyScores = dailyResponse.ok ? await dailyResponse.json() : [];
+        
+        const qualifiesAllTime = allTimeScores.length < 10 || time < allTimeScores[allTimeScores.length - 1]?.time;
+        const qualifiesDaily = dailyScores.length < 10 || time < dailyScores[dailyScores.length - 1]?.time;
+        
+        if (qualifiesAllTime || qualifiesDaily) {
           scoreSubmission.style.display = 'block';
-          submissionStatus.innerHTML = '<div class="success">🎉 You qualified for a high score!</div>';
+          const message = qualifiesAllTime && qualifiesDaily ? 
+            '🎉 You qualified for both all-time AND daily high scores!' :
+            qualifiesAllTime ? '🎉 You qualified for an all-time high score!' :
+            '🎉 You qualified for a daily high score!';
+          submissionStatus.innerHTML = `<div class="success">${message}</div>`;
         } else {
           submissionStatus.innerHTML = '<div class="error">Your time didn\'t make the top 10. Try again!</div>';
         }
@@ -261,26 +382,33 @@ body {
       submitScoreBtn.textContent = 'Submitting...';
       
       try {
-        const response = await fetch('/api/submitScore', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            playerName: playerName,
-            time: liveTimeSeconds // Send time as a string with 2 decimal places
+        // Submit to both all-time and daily endpoints
+        const [allTimeResponse, dailyResponse] = await Promise.all([
+          fetch('/api/submitScore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerName, time: liveTimeSeconds })
+          }),
+          fetch('/api/submitDailyScore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerName, time: liveTimeSeconds })
           })
-        });
+        ]);
 
-        const result = await response.json();
+        const allTimeResult = allTimeResponse.ok ? await allTimeResponse.json() : { success: false };
+        const dailyResult = dailyResponse.ok ? await dailyResponse.json() : { success: false };
         
-        if (result.success) {
-          submissionStatus.innerHTML = `<div class="success">✅ ${result.message}</div>`;
+        if (allTimeResult.success || dailyResult.success) {
+          const messages = [];
+          if (allTimeResult.success) messages.push('all-time record');
+          if (dailyResult.success) messages.push('daily record');
+          
+          submissionStatus.innerHTML = `<div class="success">✅ Score submitted for ${messages.join(' and ')}!</div>`;
           scoreSubmission.style.display = 'none';
-          // Reload high scores to show the new score
           setTimeout(loadHighScores, 1000);
         } else {
-          submissionStatus.innerHTML = `<div class="error">${result.message}</div>`;
+          submissionStatus.innerHTML = '<div class="error">Score did not qualify for records</div>';
         }
       } catch (error) {
         console.error('Error submitting score:', error);
@@ -290,8 +418,6 @@ body {
         submitScoreBtn.textContent = 'Submit Score';
       }
     }
-
-      
 </script>
 </body>
 </html>
