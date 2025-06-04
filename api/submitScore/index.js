@@ -119,8 +119,9 @@ module.exports = async function (context, req) {
             const jsonString = JSON.stringify(scores, null, 2);
             context.log('Uploading JSON string:', jsonString);
             
-            await blobClient.uploadData(Buffer.from(jsonString), { overwrite: true });
-
+            // Simple alternative that works with most versions
+            const blockBlobClient = containerClient.getBlockBlobClient("highscores.json");
+            await blockBlobClient.upload(jsonString, jsonString.length, { overwrite: true });
             context.log('Successfully uploaded scores to blob');
 
             context.res = {
